@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 
 void main() {
@@ -14,9 +13,7 @@ class TaskFlowApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       title: 'TaskFlow',
       theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(
-          seedColor: Colors.indigo,
-        ),
+        colorScheme: ColorScheme.fromSeed(seedColor: Colors.indigo),
         useMaterial3: true,
       ),
       home: const WelcomeScreen(),
@@ -24,19 +21,53 @@ class TaskFlowApp extends StatelessWidget {
   }
 }
 
-class WelcomeScreen extends StatelessWidget {
+// SESIÓN 2: Pantalla con estado
+class WelcomeScreen extends StatefulWidget {
   const WelcomeScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    // Datos personalizados del estudiante
-    const studentName = 'Joyce Solís';
-    const pendingTasks = 5;
-    const courseName = 'Desarrollo de aplicaciones móviles';
+  State<WelcomeScreen> createState() => _WelcomeScreenState();
+}
 
-    // Variable solicitada en el reto autónomo
-    const motivationalMessage =
-        '¡Cada tarea completada me acerca a mi meta!';
+class _WelcomeScreenState extends State<WelcomeScreen> {
+  // Datos del estudiante
+  final String studentName = 'Joyce Solís';
+
+  // Estado de las tareas
+  int pendingTasks = 3;
+  int completedTasks = 0;
+
+  // Objetivo diario del reto autónomo
+  static const int dailyGoal = 5;
+
+  // Agregar una tarea pendiente
+  void _addTask() {
+    setState(() {
+      pendingTasks++;
+    });
+  }
+
+  // Completar una tarea
+  void _completeTask() {
+    if (pendingTasks == 0) {
+      return;
+    }
+
+    setState(() {
+      pendingTasks--;
+
+      // Las tareas completadas no pueden superar la meta diaria.
+      if (completedTasks < dailyGoal) {
+        completedTasks++;
+      }
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final statusMessage = pendingTasks == 0
+        ? '¡Excelente! No tienes tareas pendientes.'
+        : 'Aún tienes tareas por organizar.';
 
     return Scaffold(
       appBar: AppBar(
@@ -50,13 +81,7 @@ class WelcomeScreen extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Icono personalizado del reto
-            const Icon(
-              Icons.rocket_launch,
-              size: 64,
-              color: Colors.indigo,
-            ),
-
+            const Icon(Icons.rocket_launch, size: 56, color: Colors.indigo),
             const SizedBox(height: 24),
 
             // Saludo personalizado
@@ -64,42 +89,54 @@ class WelcomeScreen extends StatelessWidget {
               '¡Hola, $studentName!',
               style: Theme.of(context).textTheme.headlineMedium,
             ),
-
             const SizedBox(height: 12),
 
-            // Mensaje motivacional
-            const Text(
-              motivationalMessage,
-              style: TextStyle(
+            // Mensaje según el estado
+            Text(statusMessage),
+            const SizedBox(height: 12),
+
+            // Contador del reto autónomo
+            Text(
+              'Completadas hoy: $completedTasks de $dailyGoal',
+              style: const TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.bold,
                 color: Colors.indigo,
               ),
             ),
-
-            const SizedBox(height: 16),
-
-            // Nombre de la asignatura
-            Text('Bienvenido/a a $courseName.'),
-
-            const SizedBox(height: 32),
+            const SizedBox(height: 28),
 
             // Tarjeta de tareas pendientes
             Card(
-              elevation: 3,
               child: Padding(
                 padding: const EdgeInsets.all(20),
                 child: Row(
                   children: [
-                    const Icon(
-                      Icons.pending_actions,
-                      color: Colors.indigo,
-                    ),
+                    const Icon(Icons.pending_actions, color: Colors.indigo),
                     const SizedBox(width: 12),
                     Text('Tareas pendientes: $pendingTasks'),
                   ],
                 ),
               ),
+            ),
+            const SizedBox(height: 24),
+
+            // Botones interactivos
+            Wrap(
+              spacing: 12,
+              runSpacing: 12,
+              children: [
+                ElevatedButton.icon(
+                  onPressed: _addTask,
+                  icon: const Icon(Icons.add),
+                  label: const Text('Agregar tarea'),
+                ),
+                OutlinedButton.icon(
+                  onPressed: pendingTasks == 0 ? null : _completeTask,
+                  icon: const Icon(Icons.done),
+                  label: const Text('Completar una tarea'),
+                ),
+              ],
             ),
           ],
         ),
